@@ -279,13 +279,13 @@ def chestpain_targets_genders(a,b,c) :
     z = my_data['Chestpain']== c
     return my_data[x&y&z].shape[0]
 chestpain_female_target0_percentage = chestpain_targets_genders(0,0,4)/number_female_targetzero*100
-chestpain_female_target0_percentage
+print(chestpain_female_target0_percentage)
 chestpain_female_target1_percentage = chestpain_targets_genders(1,0,4)/number_female_targetone*100
-chestpain_female_target1_percentage
+print(chestpain_female_target1_percentage)
 chestpain_male_target0_percentage = chestpain_targets_genders(0,1,4)/number_male_targetzero*100
-chestpain_male_target0_percentage
+print(chestpain_male_target0_percentage)
 chestpain_male_target1_percentage = chestpain_targets_genders(1,1,4)/number_male_targetone*100
-chestpain_male_target1_percentage
+print(chestpain_male_target1_percentage)
 #percentage ratio of two target groups with same gender
 x = chestpain_female_target1_percentage/chestpain_female_target0_percentage
 y = chestpain_male_target1_percentage/ chestpain_male_target0_percentage
@@ -293,32 +293,32 @@ result = [x,y]
 result
 
 chestpain_female_target0_percentage = chestpain_targets_genders(0,0,3)/number_female_targetzero*100
-chestpain_female_target0_percentage
+print(chestpain_female_target0_percentage)
 chestpain_female_target1_percentage = chestpain_targets_genders(1,0,3)/number_female_targetone*100
-chestpain_female_target1_percentage
+print(chestpain_female_target1_percentage)
 chestpain_male_target0_percentage = chestpain_targets_genders(0,1,3)/number_male_targetzero*100
-chestpain_male_target0_percentage
+print(chestpain_male_target0_percentage)
 chestpain_male_target1_percentage = chestpain_targets_genders(1,1,3)/number_male_targetone*100
-chestpain_male_target1_percentage
+print(chestpain_male_target1_percentage)
 #percentage ratio of two target groups with same gender
 x = chestpain_female_target1_percentage/chestpain_female_target0_percentage
 y = chestpain_male_target1_percentage/ chestpain_male_target0_percentage
 result = [x,y]
-result
+print(result)
 
 chestpain_female_target0_percentage = chestpain_targets_genders(0,0,2)/number_female_targetzero*100
-chestpain_female_target0_percentage
+print(chestpain_female_target0_percentage)
 chestpain_female_target1_percentage = chestpain_targets_genders(1,0,2)/number_female_targetone*100
-chestpain_female_target1_percentage
+print(chestpain_female_target1_percentage)
 chestpain_male_target0_percentage = chestpain_targets_genders(0,1,2)/number_male_targetzero*100
-chestpain_male_target0_percentage
+print(chestpain_male_target0_percentage)
 chestpain_male_target1_percentage = chestpain_targets_genders(1,1,2)/number_male_targetone*100
-chestpain_male_target1_percentage
+print(chestpain_male_target1_percentage)
 #percentage ratio of two target groups with same gender
 x = chestpain_female_target1_percentage/chestpain_female_target0_percentage
 y = chestpain_male_target1_percentage/ chestpain_male_target0_percentage
 result = [x,y]
-result
+print(result)
 
 """SLOPE"""
 #ST segment depression (horizontal or downsloping) is the most reliable indicator of exercise-induced ischaemia(a restriction in blood supply to tissues)
@@ -363,3 +363,271 @@ targets1 = my_data.groupby(['Target','Sex'])
 targets1['Slope'].value_counts().plot(kind = 'bar',legend=True)
 targets1['Slope'].value_counts()
 
+"""Thal"""
+
+"""Thalassemia is a blood disorder
+
+• Around 64% (89 /139) people with heart disease have reversible defect type of thalassemia, represented by number 7.
+ In comparison, around 17%( 28 out of 164) people in target 0 have reversible defect type of thalassemia. • 
+ While only 2 out of 72 women who were not sick had a thal 7 value, this value increased from 13 out of 25 in sick women, 
+ in comparison 26 out of 92 men who were not sick had a thal value of 7 and value was observed in 76 out of 114 patients in sick men. 
+ Thus it is clear that reversible defect type of thalassemia has more impact on females than men having heart disease.
+"""
+
+my_data.pivot_table(values ='New_ID' ,index = ['Target','Thal','Sex'],aggfunc = 'count')
+targets['Thal'].value_counts().plot(kind = 'bar' ,legend ='True')
+targets1['Thal'].value_counts().plot(kind = 'bar',legend=True)
+
+"""Ca
+
+Ca (C-arm fluoroscopy results) C-arm is a medical imaging device Number of blocked major vessels supplying blood (0-3) colored by flouroscopy
+
+• When target 0 and target 1 patient numbers are compared, the number of patients with 1 blocked vessel in target 1 increased more than 2 times, the number with 2 blocked vessels increased more than 4 times, and the number with 3 blocked vessels increased almost 6 times. • Female patients with three blocked vessels are all have heart disease. • Having two-blocked vessels has the greatest effect on both males and females in developing hd.But the percentage of having 2-blocked vessels in men with illness is 9.28 times higher than men in target 0, while this value is 4.6 in women.
+"""
+my_data.pivot_table(values ='New_ID' ,index = ['Target','Ca'],aggfunc = 'count')
+my_data.pivot_table(values ='New_ID' ,index = ['Target','Ca','Sex'],aggfunc = 'count')
+targets['Ca'].value_counts().plot(kind = 'bar',legend=True)
+targets1['Ca'].value_counts().plot(kind = 'bar',legend=True)
+def target_genders(a,b) :
+    x = my_data['Target']== a
+    y = my_data['Sex']== b
+    return my_data[x&y].shape[0]
+number_female_targetone= target_genders(1,0)
+number_female_targetzero= target_genders(0,0)
+number_male_targetone= target_genders(1,1)
+number_male_targetzero= target_genders(0,1)
+#Determining the change in the incidence rate of ca 1 among the target groups
+def ca_targets_genders(a,b,c) :
+    x = my_data['Target']== a
+    y = my_data['Sex']== b
+    z = my_data['Ca']== c
+    return my_data[x&y&z].shape[0]
+ca_female_target0_percentage = ca_targets_genders(0,0,1)/number_female_targetzero*100
+print(ca_female_target0_percentage)
+ca_female_target1_percentage = ca_targets_genders(1,0,1)/number_female_targetone*100
+print(ca_female_target1_percentage)
+ca_male_target0_percentage = ca_targets_genders(0,1,1)/number_male_targetzero*100
+print(ca_male_target0_percentage)
+ca_male_target1_percentage = ca_targets_genders(1,1,1)/number_male_targetone*100
+print(ca_male_target1_percentage)
+#percentage ratio of two target groups with same gender
+x = ca_female_target1_percentage/ca_female_target0_percentage
+y = ca_male_target1_percentage/ ca_male_target0_percentage
+result = [x,y]
+print(result)
+
+#Determining the change in the incidence rate of ca 2 among the target groups
+ca_female_target0_percentage = ca_targets_genders(0,0,2)/number_female_targetzero*100
+print(ca_female_target0_percentage)
+ca_female_target1_percentage = ca_targets_genders(1,0,2)/number_female_targetone*100
+print(ca_female_target1_percentage)
+ca_male_target0_percentage = ca_targets_genders(0,1,2)/number_male_targetzero*100
+print(ca_male_target0_percentage)
+ca_male_target1_percentage = ca_targets_genders(1,1,2)/number_male_targetone*100
+print(ca_male_target1_percentage)
+#percentage ratio of two target groups with same gender
+x = ca_female_target1_percentage/ca_female_target0_percentage
+y = ca_male_target1_percentage/ ca_male_target0_percentage
+result = [x,y]
+print(result)
+#https://seaborn.pydata.org/tutorial/categorical.html
+sns.catplot(y="Ca", hue="Target", kind="count",data=my_data)
+plt.show()
+
+"""Oldpeak
+
+ST depression induced by exercise relative to rest
+
+• For patients in target 1, the avg. old peak value of 1,41 is 2,5 times the avg. old peak value in patients of target 0.(0,56) 
+• Males do not show disease at higher old peak values in target 0 compared to female patients.In target 1 ,
+males have higher mean value of 1.42 than females with a mean value of 1.36.
+"""
+
+sns.distplot(my_data[my_data['Target']==1]['Oldpeak'],kde=True,bins=35)
+sns.distplot(my_data[my_data['Target']==0]['Oldpeak'],kde=True,bins=35,label =['Target 0'])
+#https://seaborn.pydata.org/generated/seaborn.boxplot.html#seaborn.boxplot
+sns.boxplot(x='Target',y='Oldpeak',hue ='Sex',data= my_data)
+outliers('Oldpeak')
+#determination of outlier values
+q1=my_data['Oldpeak'].quantile(0.25)
+q3=my_data['Oldpeak'].quantile(0.75)
+Interquar=q3-q1
+print(q1)
+print(q3)
+print(Interquar)
+Lower_outlier_value = q1-(1.5*Interquar)
+Upper_outlier_value = q3+(1.5*Interquar)
+print(Lower_outlier_value, Upper_outlier_value)
+my_data_oldpeak = my_data[my_data['Oldpeak'] > Upper_outlier_value]
+print(my_data_oldpeak)
+my_data_oldpeak1=my_data[my_data['Oldpeak'] < Upper_outlier_value]
+my_data_oldpeak1.describe()
+mask = my_data_oldpeak1.groupby(['Target','Sex'])
+mask.describe().stack()
+
+"""Restecg
+
+Resting ecg results
+
+• 80 out of 139 ( around 57%) sick patients are showing probable or definite left ventricular hypertrophy by Estes' criteria(value2). 
+In contrast, it is 68 out of 164.(around 41%) in target 0
+• The percentage of sick women with probable or definite left ventricular hypertrophy is almost 1.30 times higher than 
+the percentage of non-sick women having this value,in comparison the percentage of it is nearly 1.44 times higher in men 
+than in those who are not sick.Thus, having probable or definite left ventricular hypertrophy has more impact on males than females.
+"""
+targets['RestECG'].value_counts().plot(kind = 'bar',legend=True)
+targets1['RestECG'].value_counts().plot(kind = 'bar',legend=True)
+def restecg_targets_genders(a,b,c) :
+    x = my_data['Target']== a
+    y = my_data['Sex']== b
+    z = my_data['RestECG']== c
+    return my_data[x&y&z].shape[0]
+restecg2_female_target0_percentage = restecg_targets_genders(0,0,2)/number_female_targetzero*100
+print(restecg2_female_target0_percentage)
+restecg2_female_target1_percentage = restecg_targets_genders(1,0,2)/number_female_targetone*100
+print(restecg2_female_target1_percentage)
+restecg2_male_target0_percentage = restecg_targets_genders(0,1,2)/number_male_targetzero*100
+print(restecg2_male_target0_percentage)
+restecg2_male_target1_percentage = restecg_targets_genders(1,1,2)/number_male_targetone*100
+print(restecg2_male_target1_percentage)
+#percentage difference with same gender between two target groups
+x = restecg2_female_target1_percentage/restecg2_female_target0_percentage
+y = restecg2_male_target1_percentage/ restecg2_male_target0_percentage
+result = [x,y]
+print(result)
+targets1['RestECG'].value_counts()
+
+"""Exang
+
+(exercise induced angina)
+
+• 76 out of 139 people in target 1 have exercise-induced angina. In comparison, it is 23 out of 161 in target 0.
+ • The percentage of women with exercise-induced angina at target 1 is 5 times the percentage at target 0 and for men it is 3.3 times 
+ the percentage at target 0 . • Having exercise-induced angina has greater impact on females in developing heart disease than men.
+"""
+targets1['Exang'].value_counts().plot(kind = 'barh',legend=True)
+targets['Exang'].value_counts().plot(kind = 'barh',legend=True)
+#to determine the number of patients of different gender in target groups
+def exang_targets_genders(a,b,c) :
+    x = my_data['Target']== a
+    y = my_data['Sex']== b
+    z = my_data['Exang']== c
+    return my_data[x&y&z].shape[0]
+exang_female_target0_percentage = exang_targets_genders(0,0,1)/number_female_targetzero*100
+print(exang_female_target0_percentage)
+exang_female_target1_percentage = exang_targets_genders(1,0,1)/number_female_targetone*100
+print(exang_female_target1_percentage)
+exang_male_target0_percentage = exang_targets_genders(0,1,1)/number_male_targetzero*100
+print(exang_male_target0_percentage)
+exang_male_target1_percentage = exang_targets_genders(1,1,1)/number_male_targetone*100
+print(exang_male_target1_percentage)
+#percentage difference with same gender between two target groups
+x = exang_female_target1_percentage/exang_female_target0_percentage
+y = exang_male_target1_percentage/ exang_male_target0_percentage
+result = [x,y]
+print(result)
+
+"""Chol
+
+Serum cholesterol in mg/dl
+
+• The difference in cholesterol levels between those who are sick and those who are not is about 10 mmHg, and this value 
+is about 17 mmHg in women and 15 mmHg in men. • Men develop disease with lower cholesterol levels than women.
+"""
+sns.distplot(my_data[my_data['Target']==1]['Chol'],kde=True,bins=35)
+plt.show()
+sns.distplot(my_data[my_data['Target']==0]['Chol'],kde=True,bins=35)
+plt.show()
+sns.boxplot(x='Target',y='Chol',hue ='Sex',data= my_data)
+#https://medium.com/analytics-vidhya/outlier-treatment-9bbe87384d02
+outliers('Chol')
+mask = my_data['Chol'] < 371
+mask1 = my_data['Chol'] > 115
+my_data_chol= my_data[mask&mask1]
+my_data_chol.describe()
+mask = my_data_chol.groupby(['Target','Sex'])
+mask.describe().stack()
+sns.swarmplot(x='Chol', y='Thal', data=my_data_chol, hue='Target')
+plt.show()
+sns.boxplot(x='Target',y='Chol',hue ='Chestpain',data= my_data_chol)
+plt.show()
+
+"""Maximum Heart Rate
+
+By convention, the maximum predicted heart rate is calculated as 220 (210 for women) minus the patient’s age.
+
+• Sick patients achieved less heart rate with an avg. of 139 than non sick patients with average value of 158 . 
+• In target 0,the avg.heart rate of men is almost 162 and it is 154 for women. 
+• In target 1,the avg.heart rate of men is nearly 138 and it is nearly 143 for women. 
+• Women are more susceptible to heart rate decline in developing the disease.
+"""
+
+outliers('MaxHeartRate')
+my_data_maxheartrate = my_data[my_data['MaxHeartRate'] > Upper_outlier_value]
+print(my_data_maxheartrate.shape)
+#there is no upper outlier value in maximum heart rate column
+my_data_maxheartrate1 = my_data[my_data['MaxHeartRate'] < 84.75]
+print(my_data_maxheartrate1)
+##There is only one lower outlier value so it was ignored as it had no meaningful effect on the mean value.
+
+targets = my_data.groupby(['Target'])
+targets.mean()
+targets.describe().stack()
+mask = my_data.groupby(['Target','Sex'])
+mask['MaxHeartRate'].mean()
+sns.distplot(my_data[my_data['Target']==1]['MaxHeartRate'],kde=True,bins=35,rug=True)
+sns.distplot(my_data[my_data['Target']==0]['MaxHeartRate'],kde=True,bins=35,rug=True)
+"""Resting Blood Pressure
+
+in mm Hg on admission to hospital
+
+• The average blood pressure is 128 mmHg in non-sick patients, and it is 131 mmHg in patients with heart disease. • In target 1, the avg. rbp level for women is 138.15 mmHg, it is lower in men with a value of 130.2 mmHg. • In target 1, male patients' third quartile rbp value is 140 mmHg, whereas it is 150 mmHg in females. • Patients having resting blood pressure above 180 mmHg are all have heart disease. • It is observed that men develop heart disease in lower blood pressure than women.
+"""
+outliers('RestingBloodPressure')
+my_data_restingbloodpressure = my_data[my_data['RestingBloodPressure'] > 170]
+print(my_data_restingbloodpressure.shape)
+my_data_restingbloodpressure1 = my_data[my_data['RestingBloodPressure'] < 90]
+print(my_data_restingbloodpressure1.shape)
+my_data_restingbloodpressure1 = my_data[my_data['RestingBloodPressure'] < 90]
+print(my_data_restingbloodpressure1.shape)
+my_data_rbp = my_data[my_data['RestingBloodPressure'] < 170]
+my_data_rbp.describe()
+mask = my_data_rbp.groupby(['Target','Sex'])
+mask.describe().stack()
+sns.distplot(my_data[my_data['Target']==1]['RestingBloodPressure'],kde=True,bins=35,rug=True)
+sns.distplot(my_data[my_data['Target']==0]['RestingBloodPressure'],kde=True,bins=35,rug=True)
+
+"""Fasting Blood Sugar
+
+• In target 1, 22 out of 139 patients have high fbs level with a percentage of 15.8% and in target 0,the percentage of having high fbs level is 14.0%. • The percentage of having high fbs levels in women with illness is 2.88 times higher than women in target 0, while this value is 0.76 times lower in men. • High fbs level has a greater effect in women than in men.
+"""
+targets['FastingBloodSugar'].value_counts().plot(kind = 'barh',legend=True)
+targets['FastingBloodSugar'].value_counts()
+def target_genders(a,b) :
+    x = my_data['Target']== a
+    y = my_data['Sex']== b
+    return my_data[x&y].shape[0]
+number_female_targetone= target_genders(1,0)
+number_female_targetzero= target_genders(0,0)
+number_male_targetone= target_genders(1,1)
+number_male_targetzero= target_genders(0,1)
+def fbs_targets_genders(d,e,f) :
+    k = my_data['Target']== d
+    l = my_data['Sex']== e
+    m = my_data['FastingBloodSugar']== f
+    return my_data[k&l&m].shape[0]
+fbs_female_target0_percentage = fbs_targets_genders(0,0,1)/number_female_targetzero*100
+print(fbs_female_target0_percentage)
+fbs_female_target1_percentage = fbs_targets_genders(1,0,1)/number_female_targetone*100
+print(fbs_female_target1_percentage)
+fbs_male_target0_percentage = fbs_targets_genders(0,1,1)/number_male_targetzero*100
+print(fbs_male_target0_percentage)
+fbs_male_target1_percentage = fbs_targets_genders(1,1,1)/number_male_targetone*100
+print(fbs_male_target1_percentage)
+#percentage difference with same gender between two target groups
+x = fbs_female_target1_percentage/fbs_female_target0_percentage
+y = fbs_male_target1_percentage/ fbs_male_target0_percentage
+result = [x,y]
+print(result)
+targets = my_data.groupby(['Target','Sex','FastingBloodSugar'])
+targets.size()
