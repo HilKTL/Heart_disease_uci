@@ -108,15 +108,10 @@ my_data['Thal'] = my_data['Thal'].replace('?', 3)
 my_data['Thal']=my_data['Thal'].astype('category')
 #my_data.info()
 
-croostab = rp.crosstab(my_data['Ca'],my_data['Target'],test = 'chi-square')
-print(croostab)
-rp.crosstab(my_data['Ca'],my_data['Sex'],test = 'chi-square')
-rp.crosstab(my_data['Ca'],my_data['Chestpain'],test = 'chi-square')
-rp.crosstab(my_data['Ca'],my_data['FastingBloodSugar'],test = 'chi-square')
-rp.crosstab(my_data['Ca'],my_data['RestECG'],test = 'chi-square')
-rp.crosstab(my_data['Ca'],my_data['Exang'],test = 'chi-square')
-rp.crosstab(my_data['Ca'],my_data['Slope'],test = 'chi-square')
-rp.crosstab(my_data['Ca'],my_data['Thal'],test = 'chi-square')
+for x in ['Target','Sex','Chestpain','FastingBloodSugar','RestECG','Exang','Slope','Thal']:
+    croostab = rp.crosstab(my_data['Ca'],my_data['Target'],test = 'chi-square')
+    print(croostab)
+    print('\n--------------------------------')
 
 """Cramer's V coefficient association between Ca and categorical attributes                        
     
@@ -130,34 +125,13 @@ from scipy import stats
 
 x1 = my_data['Ca']
 
-x2 = my_data['MaxHeartRate']
+for x in ['MaxHeartRate','Oldpeak','Age','Chol','RestingBloodPressure'] :
+    x2 = my_data[x]
 
-tau,pvalue = stats.kendalltau(x1, x2)
+    tau,pvalue = stats.kendalltau(x1, x2)
 
-print(tau,pvalue)
-
-x1 = my_data['Ca']
-
-x2 = my_data['Oldpeak']
-
-tau, p_value = stats.kendalltau(x1, x2)
-
-print(tau,p_value)
-
-x1 = my_data['Ca']
-
-x2 = my_data['Age']
-
-tau, p_value = stats.kendalltau(x1, x2)
-
-print(tau,p_value)
-
-x1 = my_data['Ca']
-
-x2 = my_data['RestingBloodPressure']
-
-tau, p_value = stats.kendalltau(x1, x2)
-print(tau,p_value)
+    print(tau)
+    print('\n-----------------------',x)
 
 mask = my_data[my_data['Ca'] == '?']
 
@@ -631,3 +605,179 @@ result = [x,y]
 print(result)
 targets = my_data.groupby(['Target','Sex','FastingBloodSugar'])
 targets.size()
+
+"""FEATURE SELECTION
+Determining the association between Target attribute and categorical attributes:
+Cramer coefficient correlation between categorical attributes :
+"""
+#https://researchpy.readthedocs.io/en/latest/crosstab_documentation.html
+import researchpy
+for x in ['Sex','RestECG','Exang','Slope','Thal','FastingBloodSugar','Chestpain'] :
+    croostab = researchpy.crosstab(my_data['Target'],my_data[x],test = 'chi-square')
+    print(croostab)
+    print('\n------------------------------------')
+
+"""According to Cramer's V correlation ; Having thalassemia disorder and having angina have strong correlation with developing heart disease.
+C-arm fluoroscopy results,having exercise-induced angina and Slope results have moderate association with developing heart disease.
+Fasting Blood sugar level has the lowest association with target 1."""
+
+"""Determining the association between Target attribute and numerical attributes with Logistic Regression"""
+
+#https://towardsdatascience.com/interpreting-coefficients-in-linear-and-logistic-regression-6ddf1295f6f1
+from sklearn. linear_model import LogisticRegression
+X = my_data[['Age','RestingBloodPressure','Chol','MaxHeartRate','Oldpeak']]
+y = my_data['Target']
+logreg = LogisticRegression(solver = 'liblinear')
+logreg.fit(X,y)
+y = y.astype('float')
+log_odds = logreg.coef_[0]
+pd.DataFrame(log_odds,X.columns,columns = ['coef'])\
+.sort_values(by='coef',ascending=False)
+"""According to results:
+
+Maximum heart rate achieved and ST depression induced by exercise relative to rest have the strongest association with developing heart disease.Cholesterol levels and Age and Resting Blood Pressure have weaker association with developing heart disease.
+"""
+
+"""APPLY MODEL"""
+#MODEL SELECTION
+from sklearn import model_selection
+from sklearn. linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+data = my_data
+values = data.values
+# Preparing Data For Training
+Y = values[:,14]
+#target column is labeled.
+X = values[:,0:14]
+Y= Y.astype('int32')
+
+"""Cross validation without removing outlier values and weak associated features"""
+#Cross validation (Model evaluation)
+outcome = []
+model_names = []
+models = [('LogReg', LogisticRegression(solver = 'liblinear')),
+          ('GaussianNB', GaussianNB()),
+          ('RandomForest',RandomForestClassifier(n_estimators=100)),
+          ('DecTree', DecisionTreeClassifier()),
+          ('KNN', KNeighborsClassifier())]
+#Cross validation (Model evaluation)
+random_seed =12
+for model_name, model in models:
+    k_fold_validation = model_selection.KFold(n_splits=10, random_state=random_seed,shuffle = True)
+    results = model_selection.cross_val_score(model, X, Y, cv=k_fold_validation, scoring='accuracy')
+    outcome.append(results)
+    model_names.append(model_name)
+    output_message = "%s| Mean=%f STD=%f" % (model_name, results.mean(), results.std())
+    print(output_message)
+#Visualization of performances of models
+fig = plt.figure()
+fig.suptitle('ML Model Comparison')
+ax = fig.add_subplot(111)
+plt.boxplot(outcome)
+ax.set_xticklabels(model_names)
+plt.show()
+"""Removing Outliers"""
+outliers('Oldpeak')
+my_data.drop(my_data[my_data['Oldpeak'] > 4].index, inplace = True)
+print(my_data.shape)
+my_data.drop(my_data[my_data['Chol'] > 371].index, inplace = True)
+print(my_data.shape)
+outliers('MaxHeartRate')
+my_data.drop(my_data[my_data['MaxHeartRate'] < 84.75].index, inplace = True)
+print(my_data.shape)
+outliers('RestingBloodPressure')
+my_data.drop(my_data[my_data['RestingBloodPressure'] > 170].index, inplace = True)
+print(my_data.shape)
+"""Cross validation after removing outlier values"""
+#MODEL COMPARISON AFTER REMOVING OUTLIERS
+random_seed =12
+for model_name, model in models:
+    k_fold_validation = model_selection.KFold(n_splits=10, random_state=random_seed,shuffle=True)
+    results = model_selection.cross_val_score(model, X, Y, cv=k_fold_validation, scoring='accuracy')
+    outcome.append(results)
+    model_names.append(model_name)
+    output_message = "%s| Mean=%f STD=%f" % (model_name, results.mean(), results.std())
+    print(output_message)
+fig = plt.figure()
+fig.suptitle('Machine Learning Model Comparison')
+ax = fig.add_subplot(111)
+plt.boxplot(outcome)
+ax.set_xticklabels(model_names,rotation= 45)
+
+plt.show()
+#After removing outliers; the performance of Decision Tree increased.
+
+"""Cross validation after removing outlier values and weak associated features"""
+my_datas = my_data.drop(columns = ['Chol','FastingBloodSugar','Age','RestingBloodPressure'])
+print(my_datas.shape)
+data = my_datas
+values = data.values
+
+Y = values[:,10]
+X = values[:,0:10]
+Y= Y.astype('int32')
+random_seed =12
+for model_name, model in models:
+    k_fold_validation = model_selection.KFold(n_splits=10, random_state=random_seed,shuffle =True)
+    results = model_selection.cross_val_score(model, X, Y, cv=k_fold_validation, scoring='accuracy')
+    outcome.append(results)
+    model_names.append(model_name)
+    output_message = "%s| Mean=%f STD=%f" % (model_name, results.mean(), results.std())
+    print(output_message)
+
+#https://towardsdatascience.com/interpreting-coefficients-in-linear-and-logistic-regression-6ddf1295f6f1
+from sklearn.metrics import classification_report,confusion_matrix
+import numpy as np
+X = my_data[['Age','Chestpain','Sex','RestingBloodPressure','RestECG','MaxHeartRate','Exang','Oldpeak',
+         'Slope','Ca','Thal','Chol','FastingBloodSugar']]
+y = my_data['Target']
+logreg = LogisticRegression(solver = 'liblinear')
+logreg.fit(X,y)
+log_odds = logreg.coef_[0]
+
+pd.DataFrame(log_odds,X.columns,columns = ['coef'])\
+.sort_values(by='coef',ascending=False)
+odds = np.exp(logreg.coef_[0])
+pd.DataFrame(odds,
+             X.columns,
+             columns=['coef'])\
+            .sort_values(by='coef', ascending=False)
+#FEATURE IMPORTANCE IN FEMALES
+my_datafem = my_data[my_data['Sex']== 0]
+#my_datafem.head()
+X = my_datafem[['Age','Chestpain','RestingBloodPressure','RestECG','MaxHeartRate','Exang','Oldpeak',
+         'Slope','Ca','Thal','Chol','FastingBloodSugar']]
+y = my_datafem['Target']
+logreg = LogisticRegression(solver = 'liblinear')
+logreg.fit(X,y)
+log_odds = logreg.coef_[0]
+
+pd.DataFrame(log_odds,X.columns,columns = ['coef'])\
+.sort_values(by='coef',ascending=False)
+odds = np.exp(logreg.coef_[0])
+pd.DataFrame(odds,
+             X.columns,
+             columns=['coef'])\
+            .sort_values(by='coef', ascending=False)
+#FEATURE IMPORTANCE IN MALES
+my_data_male = my_data[my_data['Sex']== 1]
+#my_data_male.head()
+X = my_data_male[['Age','Chestpain','RestingBloodPressure','RestECG','MaxHeartRate','Exang','Oldpeak',
+         'Slope','Ca','Thal','Chol','FastingBloodSugar']]
+y = my_data_male['Target']
+logreg = LogisticRegression(solver = 'liblinear')
+logreg.fit(X,y)
+log_odds = logreg.coef_[0]
+
+pd.DataFrame(log_odds,X.columns,columns = ['coef'])\
+.sort_values(by='coef',ascending=False)
+odds = np.exp(logreg.coef_[0])
+pd.DataFrame(odds,
+             X.columns,
+             columns=['coef'])\
+            .sort_values(by='coef', ascending=False)
